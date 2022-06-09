@@ -1,5 +1,4 @@
 from setuptools import setup, find_packages
-from twave_client import __version__
 
 
 with open("README.md", "r") as fh:
@@ -8,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="twave-api-client",
-    version=__version__,
+    version="0.1.0",
     description="TWave API Client",
     long_description=long_description,
     long_description_content_type="text/markdown",
