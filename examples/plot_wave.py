@@ -13,6 +13,10 @@ wave_id = 'CIMuCiALPZx'
 
 api = TWaveClient(host, token)
 
+wave_ids = api.list_waves(asset_id)
+print("Wave IDs:", wave_ids)
+print(api.get_wave_meta(asset_id, wave_id))
+
 #  print(api.list_wave_data(asset_id, wave_id))
 
 wf = api.get_wave(asset_id, wave_id)

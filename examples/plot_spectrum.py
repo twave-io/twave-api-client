@@ -13,6 +13,9 @@ spec_id = '2S5UGhrYvjw'
 
 api = TWaveClient(host, token)
 
+spec_ids = api.list_spectra(asset_id)
+print("Spectrum IDs:", spec_ids)
+print(api.get_spec_meta(asset_id, spec_id))
 #  print(api.list_spec_data(asset_id, spec_id))
 
 sp = api.get_spectrum(asset_id, spec_id)

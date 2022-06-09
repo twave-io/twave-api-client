@@ -56,6 +56,15 @@ class TrendData(object):
 
 
 @dataclass
+class PipeMeta(object):
+    id: str
+    asset_id: str
+    created_at: int
+    name: str
+    metrics: List[float]
+
+
+@dataclass
 class WaveMeta(object):
     id: str
     asset_id: str
