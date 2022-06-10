@@ -1,6 +1,5 @@
 """TWave API Client"""
 
-import json
 import time
 import requests
 from .models import Asset, Metric, Trend, TrendData, PipeMeta
@@ -9,6 +8,8 @@ from .models import Spectrum, SpectrumMeta
 
 
 class TWaveClient:
+    """TWave API Client"""
+
     def __init__(self, host='localhost:8080', token=''):
         self.host = host
         self.__token = token
@@ -21,27 +22,33 @@ class TWaveClient:
         return r
 
     def list_assets(self):
+        """List asset IDs"""
         url = f'{self.__base_url}/assets'
         r = self.__request(url)
         doc = r.json()
         return doc['assets']
 
     def get_asset(self, asset_id):
+        """Get an asset given its ID"""
         url = f'{self.__base_url}/assets/{asset_id}'
         r = self.__request(url)
         return Asset(**r.json())
 
     def get_metrics(self, asset_id):
+        """List asset metrics"""
         url = f'{self.__base_url}/assets/{asset_id}/metrics'
         r = self.__request(url)
         return r.json()
 
     def get_metric(self, asset_id, metric_id):
+        """Get a metric"""
         url = f'{self.__base_url}/assets/{asset_id}/metrics/{metric_id}'
         r = self.__request(url)
         return Metric(**r.json())
 
-    def __get_trend_data(self, asset_id, metric_id, start=0, stop=time.time(), window='1h', method='max'):
+    def __get_trend_data(self, asset_id, metric_id, start=0, stop=time.time(),
+        window='1h', method='max'):
+
         url = f'{self.__base_url}/assets/{asset_id}/metrics/{metric_id}/trend'
         params = {
             "start": int(start),
@@ -53,22 +60,26 @@ class TWaveClient:
         return TrendData(**r.json())
 
     def get_trend(self, asset_id, metric_id, **args):
+        """Get a metric's trend"""
         meta = self.get_metric(asset_id, metric_id)
         data = self.__get_trend_data(asset_id, metric_id, **args)
         return Trend(meta, data)
 
     def list_pipes(self, asset_id):
+        """List asset pipelines"""
         url = f'{self.__base_url}/assets/{asset_id}/pipes'
         objects = self.__request(url).json()
         return [o['id'] for o in objects]
 
     def get_pipe_meta(self, asset_id, pipe_id):
+        """Get pipeline metadata"""
         url = f'{self.__base_url}/assets/{asset_id}/pipes/{pipe_id}'
         r = self.__request(url)
         meta = PipeMeta(**r.json())
         return meta
 
     def list_pipe_data(self, asset_id, pipe_id, start=0, stop=time.time()):
+        """List all stored pipeline data as a list of timestamps"""
         url = f'{self.__base_url}/assets/{asset_id}/pipes/{pipe_id}/data'
         params = {
             "start": int(start),
@@ -80,16 +91,19 @@ class TWaveClient:
         return ret['time']
 
     def list_waves(self, asset_id):
+        """List all waveform types"""
         url = f'{self.__base_url}/assets/{asset_id}/waves'
         objects = self.__request(url).json()
         return [o['id'] for o in objects]
 
     def get_wave_meta(self, asset_id, wave_id):
+        """Get waveform metadata"""
         url = f'{self.__base_url}/assets/{asset_id}/waves/{wave_id}'
         r = self.__request(url)
         return WaveMeta(**r.json())
 
     def list_wave_data(self, asset_id, wave_id, start=0, stop=time.time()):
+        """List all stored waveforms as a list of timestamps"""
         url = f'{self.__base_url}/assets/{asset_id}/waves/{wave_id}/data'
         params = {
             "start": int(start),
@@ -105,22 +119,26 @@ class TWaveClient:
         r = self.__request(url)
         return r.json()
 
-    def get_wave(self, asset_id, wave_id, t='last'):
+    def get_wave(self, asset_id, wave_id, timestamp='last'):
+        """Get a waveform"""
         meta = self.get_wave_meta(asset_id, wave_id)
-        data = self.__get_wave_data(asset_id, wave_id, t)
+        data = self.__get_wave_data(asset_id, wave_id, timestamp)
         return Wave(meta, data)
 
     def list_spectra(self, asset_id):
+        """List all spectrum types"""
         url = f'{self.__base_url}/assets/{asset_id}/spectra'
         objects = self.__request(url).json()
         return [o['id'] for o in objects]
 
     def get_spec_meta(self, asset_id, spec_id):
+        """Get spectrum metadata"""
         url = f'{self.__base_url}/assets/{asset_id}/spectra/{spec_id}'
         r = self.__request(url)
         return SpectrumMeta(**r.json())
 
     def list_spec_data(self, asset_id, spec_id, start=0, stop=time.time()):
+        """List all stored spectra as a list of timestamps"""
         url = f'{self.__base_url}/assets/{asset_id}/spectra/{spec_id}/data'
         params = {
             "start": int(start),
@@ -131,12 +149,13 @@ class TWaveClient:
         ret = r.json()
         return ret['time']
 
-    def __get_spec_data(self, asset_id, spec_id, t='last'):
-        url = f'{self.__base_url}/assets/{asset_id}/spectra/{spec_id}/data/{t}'
+    def __get_spec_data(self, asset_id, spec_id, timestamp='last'):
+        url = f'{self.__base_url}/assets/{asset_id}/spectra/{spec_id}/data/{timestamp}'
         r = self.__request(url)
         return r.json()
 
-    def get_spectrum(self, asset_id, id, t='last'):
-        meta = self.get_spec_meta(asset_id, id)
-        data = self.__get_spec_data(asset_id, id, t)
+    def get_spectrum(self, asset_id, spec_id, t='last'):
+        """Get a spectrum"""
+        meta = self.get_spec_meta(asset_id, spec_id)
+        data = self.__get_spec_data(asset_id, spec_id, t)
         return Spectrum(meta, data)

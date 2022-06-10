@@ -9,14 +9,14 @@ import numpy as np
 def _decode_array(data, fmt='int16_zlib'):
     bindata = b64decode(data)
 
-    if fmt == 'float32':
-        return np.frombuffer(bindata, dtype=np.float32)
-    else:
-        raise ValueError("Unknown data format: %s" % fmt)
+    if fmt != 'float32':
+        raise ValueError(f"Unknown data format: {fmt}")
+    return np.frombuffer(bindata, dtype=np.float32)
 
 
 @dataclass
-class Asset(object):
+class Asset:
+    """Definition of an asset"""
     id: str
     version: int
     created_at: int
@@ -28,7 +28,8 @@ class Asset(object):
 
 
 @dataclass
-class Metric(object):
+class Metric:
+    """Metric metadata"""
     id: str
     asset_id: str
     name: str
@@ -45,7 +46,8 @@ class Metric(object):
 
 
 @dataclass
-class TrendData(object):
+class TrendData:
+    """Trend data"""
     id: str
     start: str
     stop: str
@@ -56,7 +58,8 @@ class TrendData(object):
 
 
 @dataclass
-class PipeMeta(object):
+class PipeMeta:
+    """Pipeline metadata"""
     id: str
     asset_id: str
     created_at: int
@@ -65,7 +68,8 @@ class PipeMeta(object):
 
 
 @dataclass
-class WaveMeta(object):
+class WaveMeta:
+    """Waveform metadata"""
     id: str
     asset_id: str
     created_at: int
@@ -78,7 +82,8 @@ class WaveMeta(object):
 
 
 @dataclass
-class SpectrumMeta(object):
+class SpectrumMeta:
+    """Spectrum metadata"""
     id: str
     asset_id: str
     created_at: int
@@ -94,7 +99,7 @@ class SpectrumMeta(object):
     full: bool = False
 
 
-class Trend(object):
+class Trend:
     def __init__(self, meta, data):
         self.meta = meta
         self.__data = data
@@ -103,7 +108,7 @@ class Trend(object):
         return np.array(self.__data.time), np.array(self.__data.value)
 
 
-class Wave(object):
+class Wave:
     def __init__(self, meta, data):
         self.meta = meta
         self.__data = _decode_array(data['data'], meta.data_format)
@@ -112,12 +117,12 @@ class Wave(object):
         return len(self.__data)/self.meta.sample_rate
 
     def get_data(self):
-        n = len(self.__data)
-        x = np.linspace(0, n/self.meta.sample_rate, n)
-        return x, self.__data
+        length = len(self.__data)
+        time = np.linspace(0, length/self.meta.sample_rate, length)
+        return time, self.__data
 
 
-class Spectrum(object):
+class Spectrum:
     def __init__(self, meta, data):
         self.meta = meta
         self.__data = _decode_array(data['data'], self.meta.data_format)
