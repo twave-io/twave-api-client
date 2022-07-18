@@ -68,7 +68,12 @@ class TWaveClient:
     def list_pipes(self, asset_id):
         """List asset pipelines"""
         url = f'{self.__base_url}/assets/{asset_id}/pipes'
-        objects = self.__request(url).json()
+        r = self.__request(url)
+        r.raise_for_status()
+        objects = r.json()
+        if objects is None:
+            raise Exception('No pipes found')
+
         return [o['id'] for o in objects]
 
     def get_pipe_meta(self, asset_id, pipe_id):
@@ -93,7 +98,12 @@ class TWaveClient:
     def list_waves(self, asset_id):
         """List all waveform types"""
         url = f'{self.__base_url}/assets/{asset_id}/waves'
-        objects = self.__request(url).json()
+        r = self.__request(url)
+        r.raise_for_status()
+        objects = r.json()
+        if objects is None:
+            raise Exception('No waves found')
+
         return [o['id'] for o in objects]
 
     def get_wave_meta(self, asset_id, wave_id):
@@ -129,6 +139,9 @@ class TWaveClient:
         """List all spectrum types"""
         url = f'{self.__base_url}/assets/{asset_id}/spectra'
         objects = self.__request(url).json()
+        if objects is None:
+            raise Exception('No spectra found')
+
         return [o['id'] for o in objects]
 
     def get_spec_meta(self, asset_id, spec_id):

@@ -5,21 +5,23 @@ import matplotlib.pyplot as plt
 from twave_client import TWaveClient
 
 
-host = 'api.adif.twave.io'
+HOST = 'api.adif.twave.io'
+ASSET_ID = '46CfUrVW0rt'
+WAVE_ID = 'GG3apjmArtm'
+
 token = os.environ.get('API_TOKEN', 'MY_API_TOKEN')
+api = TWaveClient(HOST, token)
 
-asset_id = 'IM2mkWVgGLl'
-wave_id = 'CIMuCiALPZx'
-
-api = TWaveClient(host, token)
-
-wave_ids = api.list_waves(asset_id)
+wave_ids = api.list_waves(ASSET_ID)
 print("Wave IDs:", wave_ids)
-print(api.get_wave_meta(asset_id, wave_id))
+print(api.get_wave_meta(ASSET_ID, WAVE_ID))
 
 #  print(api.list_wave_data(asset_id, wave_id))
 
-wf = api.get_wave(asset_id, wave_id)
+wf = api.get_wave(ASSET_ID, WAVE_ID)
+print(wf.meta)
+print("Created at:", wf.created_at)
+print("Started at:", wf.started_at)
 
 plt.plot(*wf.get_data())
 plt.xlim([0, wf.get_duration()])

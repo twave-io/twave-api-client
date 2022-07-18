@@ -1,27 +1,31 @@
 #!/bin/env python
 
 import os
+import numpy as np
 import matplotlib.pyplot as plt
 from twave_client import TWaveClient
 
 
-host = 'api.adif.twave.io'
+HOST = 'api.adif.twave.io'
+ASSET_ID = '46CfUrVW0rt'
+METRIC_ID = '57k3sguoBfC'
+
 token = os.environ.get('API_TOKEN', 'MY_API_TOKEN')
-
-asset_id = 'IM2mkWVgGLl'
-metric_id = '7PLJmFKUeWf'
-
-api = TWaveClient(host, token)
+api = TWaveClient(HOST, token)
 
 #  print(api.list_assets())
 #  print(api.get_asset(asset_id))
 
 # print(api.get_metrics(asset_id))
 
-print(api.get_metric(asset_id, metric_id))
+print(api.get_metric(ASSET_ID, METRIC_ID))
 
-trend = api.get_trend(asset_id, metric_id, window='5m')
+trend = api.get_trend(ASSET_ID, METRIC_ID, window='5m')
+t, y = trend.get_data()
+t = np.array(t, dtype='datetime64[s]')
 
-plt.plot(*trend.get_data())
+
+plt.plot(t, y)
+plt.grid(True)
 plt.title(trend.meta.name)
 plt.show()

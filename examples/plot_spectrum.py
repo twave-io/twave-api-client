@@ -5,20 +5,20 @@ import matplotlib.pyplot as plt
 from twave_client import TWaveClient
 
 
-host = 'api.adif.twave.io'
+HOST = 'api.adif.twave.io'
+ASSET_ID = 'LDzwedpc8t6'
+SPEC_ID = '1ZVxCGEOtNS'
+
 token = os.environ.get('API_TOKEN', 'MY_API_TOKEN')
+api = TWaveClient(HOST, token)
 
-asset_id = 'IM2mkWVgGLl'
-spec_id = '2S5UGhrYvjw'
-
-api = TWaveClient(host, token)
-
-spec_ids = api.list_spectra(asset_id)
+spec_ids = api.list_spectra(ASSET_ID)
 print("Spectrum IDs:", spec_ids)
-print(api.get_spec_meta(asset_id, spec_id))
+print(api.get_spec_meta(ASSET_ID, SPEC_ID))
 #  print(api.list_spec_data(asset_id, spec_id))
 
-sp = api.get_spectrum(asset_id, spec_id)
+sp = api.get_spectrum(ASSET_ID, SPEC_ID)
+print(sp.created_at)
 
 plt.plot(*sp.get_data())
 plt.xlim([0, sp.meta.max_freq])

@@ -1,6 +1,7 @@
 """TWave API data models"""
 
 from dataclasses import dataclass, field
+from dateutil.parser import parse
 from base64 import b64decode
 from typing import List, Dict
 import numpy as np
@@ -111,6 +112,8 @@ class Trend:
 class Wave:
     def __init__(self, meta, data):
         self.meta = meta
+        self.created_at = int(parse(data['created_at']).timestamp())
+        self.started_at = float(parse(data['started_at']).timestamp())
         self.__data = _decode_array(data['data'], meta.data_format)
 
     def get_duration(self):
@@ -125,6 +128,7 @@ class Wave:
 class Spectrum:
     def __init__(self, meta, data):
         self.meta = meta
+        self.created_at = int(parse(data['created_at']).timestamp())
         self.__data = _decode_array(data['data'], self.meta.data_format)
 
     def get_data(self):
