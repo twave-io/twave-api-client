@@ -1,7 +1,9 @@
 """TWave API Client"""
 
 import time
+from dateutil.parser import parse
 import requests
+import numpy as np
 from .models import Asset, Metric, Trend, TrendData, PipeMeta
 from .models import Wave, WaveMeta
 from .models import Spectrum, SpectrumMeta
@@ -120,13 +122,20 @@ class TWaveClient:
             "stop": int(stop),
         }
         r = self.__request(url, params)
-
+        r.raise_for_status()
         ret = r.json()
-        return ret['time']
+        times = np.array([parse(t).timestamp() for t in ret['time']])
+        return times
 
-    def __get_wave_data(self, asset_id, wave_id, t='last'):
-        url = f'{self.__base_url}/assets/{asset_id}/waves/{wave_id}/data/{t}'
+    def __get_wave_data(self, asset_id, wave_id, timestamp='last'):
+        if isinstance(timestamp, str) and timestamp != 'last':
+            timestamp = parse(timestamp).timestamp()
+        elif isinstance(timestamp, float):
+            timestamp = int(timestamp)
+
+        url = f'{self.__base_url}/assets/{asset_id}/waves/{wave_id}/data/{timestamp}'
         r = self.__request(url)
+        r.raise_for_status()
         return r.json()
 
     def get_wave(self, asset_id, wave_id, timestamp='last'):
@@ -158,11 +167,18 @@ class TWaveClient:
             "stop": int(stop),
         }
         r = self.__request(url, params)
+        r.raise_for_status()
 
         ret = r.json()
-        return ret['time']
+        times = np.array([parse(t).timestamp() for t in ret['time']])
+        return times
 
     def __get_spec_data(self, asset_id, spec_id, timestamp='last'):
+        if isinstance(timestamp, str) and timestamp != 'last':
+            timestamp = parse(timestamp).timestamp()
+        elif isinstance(timestamp, float):
+            timestamp = int(timestamp)
+
         url = f'{self.__base_url}/assets/{asset_id}/spectra/{spec_id}/data/{timestamp}'
         r = self.__request(url)
         return r.json()

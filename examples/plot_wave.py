@@ -16,8 +16,6 @@ wave_ids = api.list_waves(ASSET_ID)
 print("Wave IDs:", wave_ids)
 print(api.get_wave_meta(ASSET_ID, WAVE_ID))
 
-#  print(api.list_wave_data(asset_id, wave_id))
-
 wf = api.get_wave(ASSET_ID, WAVE_ID)
 print(wf.meta)
 print("Created at:", wf.created_at)
