@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="twave-api-client",
-    version="0.1.1",
+    version="0.1.2",
     description="TWave API Client",
     long_description=long_description,
     long_description_content_type="text/markdown",

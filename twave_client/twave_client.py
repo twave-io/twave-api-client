@@ -124,8 +124,7 @@ class TWaveClient:
         r = self.__request(url, params)
         r.raise_for_status()
         ret = r.json()
-        times = np.array([parse(t).timestamp() for t in ret['time']])
-        return times
+        return np.array(ret['time'])
 
     def __get_wave_data(self, asset_id, wave_id, timestamp='last'):
         if isinstance(timestamp, str) and timestamp != 'last':
@@ -170,8 +169,7 @@ class TWaveClient:
         r.raise_for_status()
 
         ret = r.json()
-        times = np.array([parse(t).timestamp() for t in ret['time']])
-        return times
+        return np.array(ret['time'])
 
     def __get_spec_data(self, asset_id, spec_id, timestamp='last'):
         if isinstance(timestamp, str) and timestamp != 'last':

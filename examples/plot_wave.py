@@ -6,8 +6,8 @@ from twave_client import TWaveClient
 
 
 HOST = 'api.adif.twave.io'
-ASSET_ID = '46CfUrVW0rt'
-WAVE_ID = 'GG3apjmArtm'
+ASSET_ID = '6fELe5SEJ4o'
+WAVE_ID = 'EUTeCnK53w1'
 
 token = os.environ.get('API_TOKEN', 'MY_API_TOKEN')
 api = TWaveClient(HOST, token)
@@ -16,7 +16,10 @@ wave_ids = api.list_waves(ASSET_ID)
 print("Wave IDs:", wave_ids)
 print(api.get_wave_meta(ASSET_ID, WAVE_ID))
 
-wf = api.get_wave(ASSET_ID, WAVE_ID)
+times = api.list_wave_data(ASSET_ID, WAVE_ID)
+print("Timestamps:", times)
+
+wf = api.get_wave(ASSET_ID, WAVE_ID, timestamp='last')
 print(wf.meta)
 print("Created at:", wf.created_at)
 print("Started at:", wf.started_at)
