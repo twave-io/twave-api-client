@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "twave-api-client"
+version = "0.1.2"
+description = "TWave API Client"
+authors = ["Juan <juanmb@twave.io>"]
+repository = "https://github.com/twave-io/twave-api-client"
+packages = [
+    { include = "twave_client" },
+]
+
+[tool.poetry.dependencies]
+python = ">3.6"
+requests = "^2.28.1"
+numpy = "^1.23.4"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
