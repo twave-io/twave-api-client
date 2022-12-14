@@ -1,9 +1,9 @@
 """TWave API data models"""
 
-from dataclasses import dataclass, field
-from dateutil.parser import parse
 from base64 import b64decode
-from typing import List, Dict
+from dataclasses import dataclass
+from dateutil.parser import parse
+from typing import List
 import numpy as np
 
 
@@ -43,7 +43,7 @@ class Metric:
     aggregate: str = 'mean'
     format: str = ''
     suffix: str = ''
-    tags: list = field(default_factory=list)
+    # tags: list = field(default_factory=list)
 
 
 @dataclass
@@ -75,7 +75,7 @@ class WaveMeta:
     asset_id: str
     created_at: int
     name: str
-    samples: int = 0
+    # samples: int = 0
     unit: str = ''
     data_format: str = 'float32'
 

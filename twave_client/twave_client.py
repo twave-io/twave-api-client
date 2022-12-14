@@ -19,170 +19,189 @@ class TWaveClient:
 
     def __request(self, url, params={}):
         params['links'] = False
-        r = requests.get(url, headers={'Authorization': 'Bearer ' + self.__token}, params=params)
-        r.raise_for_status()
-        return r
+        ret = requests.get(url, headers={'Authorization': 'Bearer ' + self.__token}, params=params)
+        ret.raise_for_status()
+        data = ret.json()
 
-    def list_assets(self):
-        """List asset IDs"""
+        # remove _links
+        if isinstance(data, dict):
+            data.pop('_links', None)
+        elif isinstance(data, list):
+            for item in data:
+                item.pop('_links', None)
+        return data
+
+    def get_assets(self):
+        """Get all assets"""
         url = f'{self.__base_url}/assets'
-        r = self.__request(url)
-        doc = r.json()
-        return doc['assets']
+
+        ret = self.__request(url)
+        return [Asset(**asset) for asset in ret]
 
     def get_asset(self, asset_id):
         """Get an asset given its ID"""
         url = f'{self.__base_url}/assets/{asset_id}'
-        r = self.__request(url)
-        return Asset(**r.json())
 
-    def get_metrics(self, asset_id):
+        ret = self.__request(url)
+        return Asset(**ret)
+
+    def get_metrics(self, asset_id=None):
         """List asset metrics"""
-        url = f'{self.__base_url}/assets/{asset_id}/metrics'
-        r = self.__request(url)
-        return r.json()
+        url = f'{self.__base_url}/metrics'
 
-    def get_metric(self, asset_id, metric_id):
+        params = {}
+        if asset_id:
+            params['asset'] = asset_id
+
+        ret = self.__request(url, params)
+        return [Metric(**metric) for metric in ret]
+
+    def get_metric(self, _id):
         """Get a metric"""
-        url = f'{self.__base_url}/assets/{asset_id}/metrics/{metric_id}'
-        r = self.__request(url)
-        return Metric(**r.json())
+        url = f'{self.__base_url}/metrics/{_id}'
 
-    def __get_trend_data(self, asset_id, metric_id, start=0, stop=time.time(),
-        window='1h', method='max'):
+        ret = self.__request(url)
+        return Metric(**ret)
 
-        url = f'{self.__base_url}/assets/{asset_id}/metrics/{metric_id}/trend'
+    def __get_trend_data(self, _id, start=0, stop=time.time(), window='1h', method='max'):
+        url = f'{self.__base_url}/metrics/{_id}/trend'
         params = {
             "start": int(start),
             "stop": int(stop),
             "window": window,
             "method": method,
         }
-        r = self.__request(url, params)
-        return TrendData(**r.json())
+        ret = self.__request(url, params)
+        return TrendData(**ret)
 
-    def get_trend(self, asset_id, metric_id, **args):
+    def get_trend(self, _id, **args):
         """Get a metric's trend"""
-        meta = self.get_metric(asset_id, metric_id)
-        data = self.__get_trend_data(asset_id, metric_id, **args)
+        meta = self.get_metric(_id)
+        data = self.__get_trend_data(_id, **args)
         return Trend(meta, data)
 
-    def list_pipes(self, asset_id):
+    def list_pipes(self, asset_id=None):
         """List asset pipelines"""
-        url = f'{self.__base_url}/assets/{asset_id}/pipes'
-        r = self.__request(url)
-        r.raise_for_status()
-        objects = r.json()
+        url = f'{self.__base_url}/pipes'
+        params = {}
+        if asset_id:
+            params['asset'] = asset_id
+
+        objects = self.__request(url, params)
         if objects is None:
-            raise Exception('No pipes found')
+            raise ValueError('No pipes found')
 
-        return [o['id'] for o in objects]
+        return [PipeMeta(**pipe) for pipe in objects]
 
-    def get_pipe_meta(self, asset_id, pipe_id):
+    def get_pipe_meta(self, _id):
         """Get pipeline metadata"""
-        url = f'{self.__base_url}/assets/{asset_id}/pipes/{pipe_id}'
-        r = self.__request(url)
-        meta = PipeMeta(**r.json())
-        return meta
+        url = f'{self.__base_url}/pipes/{_id}'
 
-    def list_pipe_data(self, asset_id, pipe_id, start=0, stop=time.time()):
+        ret = self.__request(url)
+        return PipeMeta(**ret)
+
+    def list_pipe_data(self, _id, start=0, stop=time.time()):
         """List all stored pipeline data as a list of timestamps"""
-        url = f'{self.__base_url}/assets/{asset_id}/pipes/{pipe_id}/data'
+        url = f'{self.__base_url}/pipes/{_id}/data'
         params = {
             "start": int(start),
             "stop": int(stop),
         }
-        r = self.__request(url, params)
 
-        ret = r.json()
-        return ret['time']
-
-    def list_waves(self, asset_id):
-        """List all waveform types"""
-        url = f'{self.__base_url}/assets/{asset_id}/waves'
-        r = self.__request(url)
-        r.raise_for_status()
-        objects = r.json()
-        if objects is None:
-            raise Exception('No waves found')
-
-        return [o['id'] for o in objects]
-
-    def get_wave_meta(self, asset_id, wave_id):
-        """Get waveform metadata"""
-        url = f'{self.__base_url}/assets/{asset_id}/waves/{wave_id}'
-        r = self.__request(url)
-        return WaveMeta(**r.json())
-
-    def list_wave_data(self, asset_id, wave_id, start=0, stop=time.time()):
-        """List all stored waveforms as a list of timestamps"""
-        url = f'{self.__base_url}/assets/{asset_id}/waves/{wave_id}/data'
-        params = {
-            "start": int(start),
-            "stop": int(stop),
-        }
-        r = self.__request(url, params)
-        r.raise_for_status()
-        ret = r.json()
+        ret = self.__request(url, params)
         return np.array(ret['time'])
 
-    def __get_wave_data(self, asset_id, wave_id, timestamp='last'):
+    def list_waves(self, asset_id=None):
+        """List all waveform types"""
+        url = f'{self.__base_url}/waves'
+
+        params = {}
+        if asset_id is not None:
+            params['asset'] = asset_id
+
+        objects = self.__request(url, params)
+        if objects is None:
+            raise ValueError('No waves found')
+
+        return [WaveMeta(**wave) for wave in objects]
+
+    def get_wave_meta(self, _id):
+        """Get waveform metadata"""
+        url = f'{self.__base_url}/waves/{_id}'
+
+        ret = self.__request(url)
+        return WaveMeta(**ret)
+
+    def list_wave_data(self, _id, start=0, stop=time.time()):
+        """List all stored waveforms as a list of timestamps"""
+        url = f'{self.__base_url}/waves/{_id}/data'
+        params = {
+            "start": int(start),
+            "stop": int(stop),
+        }
+
+        ret = self.__request(url, params)
+        return np.array(ret['time'])
+
+    def __get_wave_data(self, _id, timestamp='last'):
         if isinstance(timestamp, str) and timestamp != 'last':
             timestamp = parse(timestamp).timestamp()
         elif isinstance(timestamp, float):
             timestamp = int(timestamp)
 
-        url = f'{self.__base_url}/assets/{asset_id}/waves/{wave_id}/data/{timestamp}'
-        r = self.__request(url)
-        r.raise_for_status()
-        return r.json()
+        url = f'{self.__base_url}/waves/{_id}/data/{timestamp}'
+        return self.__request(url)
 
-    def get_wave(self, asset_id, wave_id, timestamp='last'):
+    def get_wave(self, _id, timestamp='last'):
         """Get a waveform"""
-        meta = self.get_wave_meta(asset_id, wave_id)
-        data = self.__get_wave_data(asset_id, wave_id, timestamp)
+        meta = self.get_wave_meta(_id)
+        data = self.__get_wave_data(_id, timestamp)
         return Wave(meta, data)
 
-    def list_spectra(self, asset_id):
+    def list_spectra(self, asset_id=None):
         """List all spectrum types"""
-        url = f'{self.__base_url}/assets/{asset_id}/spectra'
-        objects = self.__request(url).json()
+        url = f'{self.__base_url}/spectra'
+
+        param = {}
+        if asset_id is not None:
+            param['asset'] = asset_id
+
+        objects = self.__request(url, param)
         if objects is None:
             raise Exception('No spectra found')
 
-        return [o['id'] for o in objects]
+        return [SpectrumMeta(**spec) for spec in objects]
 
-    def get_spec_meta(self, asset_id, spec_id):
+    def get_spec_meta(self, _id):
         """Get spectrum metadata"""
-        url = f'{self.__base_url}/assets/{asset_id}/spectra/{spec_id}'
-        r = self.__request(url)
-        return SpectrumMeta(**r.json())
+        url = f'{self.__base_url}/spectra/{_id}'
 
-    def list_spec_data(self, asset_id, spec_id, start=0, stop=time.time()):
+        ret = self.__request(url)
+        return SpectrumMeta(**ret)
+
+    def list_spec_data(self, id, start=0, stop=time.time()):
         """List all stored spectra as a list of timestamps"""
-        url = f'{self.__base_url}/assets/{asset_id}/spectra/{spec_id}/data'
+        url = f'{self.__base_url}/spectra/{id}/data'
+
         params = {
             "start": int(start),
             "stop": int(stop),
         }
-        r = self.__request(url, params)
-        r.raise_for_status()
-
-        ret = r.json()
+        ret = self.__request(url, params)
         return np.array(ret['time'])
 
-    def __get_spec_data(self, asset_id, spec_id, timestamp='last'):
+    def __get_spec_data(self, id, timestamp='last'):
         if isinstance(timestamp, str) and timestamp != 'last':
             timestamp = parse(timestamp).timestamp()
         elif isinstance(timestamp, float):
             timestamp = int(timestamp)
 
-        url = f'{self.__base_url}/assets/{asset_id}/spectra/{spec_id}/data/{timestamp}'
-        r = self.__request(url)
-        return r.json()
+        url = f'{self.__base_url}/spectra/{id}/data/{timestamp}'
+        req = self.__request(url)
+        return req.json()
 
-    def get_spectrum(self, asset_id, spec_id, t='last'):
+    def get_spectrum(self, spec_id, t='last'):
         """Get a spectrum"""
-        meta = self.get_spec_meta(asset_id, spec_id)
-        data = self.__get_spec_data(asset_id, spec_id, t)
+        meta = self.get_spec_meta(spec_id)
+        data = self.__get_spec_data(spec_id, t)
         return Spectrum(meta, data)

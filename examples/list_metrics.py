@@ -1,36 +1,51 @@
 #!/bin/env python
 
-import os
+# import os
 import pandas as pd
 from twave_client import TWaveClient
 
 
-HOST = 'api.adif.twave.io'
-# ASSET_ID = 'Cl8xACci15o'
+# HOST = 'api.adif.twave.io'
+# token = os.environ.get('API_TOKEN', 'MY_API_TOKEN')
+# api = TWaveClient(HOST, token)
+api = TWaveClient()
 
-token = os.environ.get('API_TOKEN', 'MY_API_TOKEN')
-api = TWaveClient(HOST, token)
+assets = api.get_assets()
+print(assets)
 
-asset_ids = api.list_assets()
-print(asset_ids)
+print(api.get_asset(assets[0].id))
 
-all_metrics = []
-assets_by_id = {}
+metrics = api.get_metrics()
 
-for asset_id in asset_ids:
-    asset = api.get_asset(asset_id)
-    assets_by_id[asset_id] = asset
-    print(f"Asset: {asset.id} ({asset.description})")
+metric = api.get_metric(metrics[0].id)
+print(metric)
 
-    metrics = api.get_metrics(asset_id)
-    all_metrics.extend(metrics)
-
-
-df = pd.DataFrame(all_metrics)
-df['asset_name'] = df['asset_id'].apply(lambda x: assets_by_id[x].name)
-df['device'] = df['asset_id'].apply(lambda x: assets_by_id[x].description)
+assets_df = pd.DataFrame(assets)
+df = pd.DataFrame(metrics)
 
 # print the full dataframe
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
-print(df[['asset_id', 'asset_name', 'device', 'id', 'name']])
+print(df)
+# print(df[['asset_id', 'asset_name', 'device', 'id', 'name']])
+
+pipes = api.list_pipes()
+pipes_df = pd.DataFrame(pipes)
+print(pipes_df)
+
+pipe = api.get_pipe_meta(pipes[0].id)
+print(pipe)
+
+waves = api.list_waves()
+waves_df = pd.DataFrame(waves)
+print(waves_df)
+
+wave = api.get_wave_meta(waves[0].id)
+print(wave)
+
+spectra = api.list_spectra()
+spectra_df = pd.DataFrame(spectra)
+print(spectra_df)
+
+spectrum = api.get_spec_meta(spectra[0].id)
+print(spectrum)
