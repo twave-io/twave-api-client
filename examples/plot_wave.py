@@ -1,25 +1,28 @@
 #!/bin/env python
 
 import os
+import pandas as pd
 import matplotlib.pyplot as plt
 from twave_client import TWaveClient
 
-
 HOST = 'api.adif.twave.io'
-ASSET_ID = '6fELe5SEJ4o'
-WAVE_ID = 'EUTeCnK53w1'
 
 token = os.environ.get('API_TOKEN', 'MY_API_TOKEN')
 api = TWaveClient(HOST, token)
 
-wave_ids = api.list_waves(ASSET_ID)
-print("Wave IDs:", wave_ids)
-print(api.get_wave_meta(ASSET_ID, WAVE_ID))
+waves = api.list_waves()
 
-times = api.list_wave_data(ASSET_ID, WAVE_ID)
+# create a dataframe from the waves and print it
+df = pd.DataFrame(waves)
+print(df)
+
+# list the snapshots for the first wave
+wave = waves[0]
+times = api.list_wave_data(wave.id)
 print("Timestamps:", times)
 
-wf = api.get_wave(ASSET_ID, WAVE_ID, timestamp='last')
+# get the last snapshot of the wave
+wf = api.get_wave(wave.id, timestamp='last')
 print(wf.meta)
 print("Created at:", wf.created_at)
 print("Started at:", wf.started_at)

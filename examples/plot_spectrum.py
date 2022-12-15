@@ -1,25 +1,30 @@
 #!/bin/env python
 
 import os
+import pandas as pd
 import matplotlib.pyplot as plt
 from twave_client import TWaveClient
 
 
 HOST = 'api.adif.twave.io'
-ASSET_ID = '6fELe5SEJ4o'
-SPEC_ID = '7cBEemkwkUJ'
 
 token = os.environ.get('API_TOKEN', 'MY_API_TOKEN')
 api = TWaveClient(HOST, token)
 
-spec_ids = api.list_spectra(ASSET_ID)
-print("Spectrum IDs:", spec_ids)
-print(api.get_spec_meta(ASSET_ID, SPEC_ID))
+spectra = api.list_spectra()
 
-times = api.list_spec_data(ASSET_ID, SPEC_ID)
+# create a dataframe from the spectra and print it
+df = pd.DataFrame(spectra)
+print(df)
+
+# list the snapshots for the first spectrum
+spec = spectra[0]
+times = api.list_spectrum_data(spec.id)
 print("Timestamps:", times)
 
-sp = api.get_spectrum(ASSET_ID, SPEC_ID, t=times[0])
+# get the last snapshot of the spectrum
+sp = api.get_spectrum(spec.id, timestamp='last')
+print(sp.meta)
 print("Created at:", sp.created_at)
 
 plt.plot(*sp.get_data())

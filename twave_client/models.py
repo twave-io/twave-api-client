@@ -7,6 +7,7 @@ from typing import List
 import numpy as np
 
 
+
 def _decode_array(data, fmt='int16_zlib'):
     bindata = b64decode(data)
 
@@ -40,7 +41,7 @@ class Metric:
     limit_min: float = 0
     limit_max: float = 0
     has_alarm: bool = False
-    aggregate: str = 'mean'
+    agg_method: str = 'mean'
     format: str = ''
     suffix: str = ''
     # tags: list = field(default_factory=list)
@@ -95,15 +96,18 @@ class SpectrumMeta:
 
 
 class Trend:
+    """Trend data"""
     def __init__(self, meta, data):
         self.meta = meta
         self.__data = data
 
     def get_data(self):
+        """Return time and value arrays"""
         return np.array(self.__data.time), np.array(self.__data.value)
 
 
 class Wave:
+    """Waveform data"""
     def __init__(self, meta, data):
         self.meta = meta
         self.created_at = int(parse(data['created_at']).timestamp())
@@ -112,15 +116,18 @@ class Wave:
         self.__sample_rate = data['sample_rate']
 
     def get_duration(self):
+        """Return duration in seconds"""
         return len(self.__data)/self.__sample_rate
 
     def get_data(self):
+        """Return time and value arrays"""
         length = len(self.__data)
         time = np.linspace(0, length/self.__sample_rate, length)
         return time, self.__data
 
 
 class Spectrum:
+    """Spectrum data"""
     def __init__(self, meta, data):
         self.meta = meta
         self.created_at = int(parse(data['created_at']).timestamp())
@@ -130,5 +137,6 @@ class Spectrum:
         self.window = data['window']
 
     def get_data(self):
+        """Return frequency and value arrays"""
         freq = np.linspace(0, self.max_freq, len(self.__data))
         return freq, self.__data

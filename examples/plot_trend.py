@@ -8,18 +8,20 @@ from twave_client import TWaveClient
 
 
 HOST = 'api.adif.twave.io'
-ASSET_ID = '46CfUrVW0rt'
-# METRIC_ID = '57k3sguoBfC'
-METRIC_ID = '5id7EjsUHOd'
+METRIC_NAME = 'PT100_1.val'
 
 token = os.environ.get('API_TOKEN', 'MY_API_TOKEN')
 api = TWaveClient(HOST, token)
 
-print(api.get_metric(ASSET_ID, METRIC_ID))
+# get the first metric with the given name
+metrics = api.list_metrics(name=METRIC_NAME)
+metric = metrics[0]
 
-# get last week of data
-start_time = time.time() - 3600 * 24 * 7
-trend = api.get_trend(ASSET_ID, METRIC_ID, start=start_time, window='5m')
+print(metric)
+
+# get last year of data
+start_time = time.time() - 3600 * 24 * 7 * 52*10
+trend = api.get_trend(metric.id, start=start_time, window='5m')
 t, y = trend.get_data()
 t = np.array(t, dtype='datetime64[s]')
 
