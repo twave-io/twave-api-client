@@ -14,7 +14,7 @@ waves = api.list_waves()
 
 # create a dataframe from the waves and print it
 df = pd.DataFrame(waves)
-print(df)
+print(df.sort_values(by='name'))
 
 # list the snapshots for the first wave
 wave = waves[0]

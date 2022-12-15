@@ -15,7 +15,7 @@ spectra = api.list_spectra()
 
 # create a dataframe from the spectra and print it
 df = pd.DataFrame(spectra)
-print(df)
+print(df.sort_values(by='name'))
 
 # list the snapshots for the first spectrum
 spec = spectra[0]
