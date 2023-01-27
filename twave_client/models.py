@@ -33,6 +33,7 @@ class Asset:
 class Metric:
     """Metric metadata"""
     id: str
+    description: str
     asset_id: str
     name: str
     data_type :str = 'float'
@@ -46,6 +47,26 @@ class Metric:
     suffix: str = ''
     # tags: list = field(default_factory=list)
 
+def import_metric(data):
+    """Import metric data"""
+    if not isinstance(data, dict):
+        raise ValueError("Invalid data format")
+
+    return Metric(
+        id=data['id'],
+        asset_id=data['asset_id'],
+        name=data['name'],
+        description=data.get('description', ''),
+        data_type=data.get('data_type', 'float'),
+        enum_type=data.get('enum_type', ''),
+        unit=data.get('unit', ''),
+        limit_min=data.get('limit_min', 0),
+        limit_max=data.get('limit_max', 0),
+        has_alarm=data.get('has_alarm', False),
+        agg_method=data.get('agg_method', 'mean'),
+        format=data.get('format', ''),
+        suffix=data.get('suffix', ''),
+    )
 
 @dataclass
 class TrendData:
@@ -63,10 +84,24 @@ class TrendData:
 class PipeMeta:
     """Pipeline metadata"""
     id: str
+    description: str
     asset_id: str
     created_at: int
     name: str
     # metrics: List[float]
+
+def import_pipe(data):
+    """Import pipe data"""
+    if not isinstance(data, dict):
+        raise ValueError("Invalid data format")
+
+    return PipeMeta(
+        id=data['id'],
+        asset_id=data['asset_id'],
+        name=data['name'],
+        description=data.get('description', ''),
+        created_at=int(parse(data['created_at']).timestamp()),
+    )
 
 
 @dataclass
@@ -74,6 +109,7 @@ class WaveMeta:
     """Waveform metadata"""
     id: str
     asset_id: str
+    description: str
     created_at: int
     name: str
     # samples: int = 0
@@ -81,10 +117,27 @@ class WaveMeta:
     data_format: str = 'float32'
 
 
+def import_wave(data):
+    """Import waveform data"""
+    if not isinstance(data, dict):
+        raise ValueError("Invalid data format")
+
+    return WaveMeta(
+        id=data['id'],
+        asset_id=data['asset_id'],
+        name=data['name'],
+        description=data.get('description', ''),
+        created_at=int(parse(data['created_at']).timestamp()),
+        unit=data.get('unit', ''),
+        data_format=data.get('data_format', 'float32'),
+    )
+
+
 @dataclass
 class SpectrumMeta:
     """Spectrum metadata"""
     id: str
+    description: str
     asset_id: str
     created_at: int
     name: str
@@ -93,6 +146,24 @@ class SpectrumMeta:
     data_format: str = 'float32'
     synchronous: bool = False
     full: bool = False
+
+def import_spectrum(data):
+    """Import spectrum data"""
+    if not isinstance(data, dict):
+        raise ValueError("Invalid data format")
+
+    return SpectrumMeta(
+        id=data['id'],
+        asset_id=data['asset_id'],
+        name=data['name'],
+        description=data.get('description', ''),
+        created_at=int(parse(data['created_at']).timestamp()),
+        unit=data.get('unit', ''),
+        suffix=data.get('suffix', ''),
+        data_format=data.get('data_format', 'float32'),
+        synchronous=data.get('synchronous', False),
+        full=data.get('full', False),
+    )
 
 
 class Trend:

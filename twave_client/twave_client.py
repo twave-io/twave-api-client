@@ -5,9 +5,8 @@ from enum import Enum
 from dateutil.parser import parse
 import requests
 import numpy as np
-from .models import Asset, Metric, Trend, TrendData, PipeMeta
-from .models import Wave, WaveMeta
-from .models import Spectrum, SpectrumMeta
+from .models import Asset, Trend, TrendData, import_metric
+from .models import Wave, Spectrum, import_pipe, import_wave, import_spectrum
 
 # create an enumeration of the object types
 class ObjectType(Enum):
@@ -86,14 +85,14 @@ class TWaveClient:
             params['name'] = name
 
         ret = self.__request(url, params)
-        return [Metric(**metric) for metric in ret]
+        return [import_metric(metric) for metric in ret]
 
     def get_metric(self, _id):
         """Get a metric"""
         url = f'{self.__base_url}/metrics/{_id}'
 
         ret = self.__request(url)
-        return Metric(**ret)
+        return import_metric(ret)
 
     def __get_trend_data(self, _id, start=0, stop=time.time(), window='1h', method='max'):
         url = f'{self.__base_url}/metrics/{_id}/trend'
@@ -126,11 +125,11 @@ class TWaveClient:
             raise ValueError(f'No {_type} found')
 
         if _type == ObjectType.PIPE:
-            return [PipeMeta(**pipe) for pipe in objects]
+            return [import_pipe(pipe) for pipe in objects]
         elif _type == ObjectType.WAVE:
-            return [WaveMeta(**wave) for wave in objects]
+            return [import_wave(wave) for wave in objects]
         elif _type == ObjectType.SPEC:
-            return [SpectrumMeta(**spec) for spec in objects]
+            return [import_spectrum(spec) for spec in objects]
         else:
             raise ValueError(f'Unknown type {_type}')
 
@@ -140,11 +139,11 @@ class TWaveClient:
 
         ret = self.__request(url)
         if _type == ObjectType.PIPE:
-            return PipeMeta(**ret)
+            return import_pipe(ret)
         elif _type == ObjectType.WAVE:
-            return WaveMeta(**ret)
+            return import_wave(ret)
         elif _type == ObjectType.SPEC:
-            return SpectrumMeta(**ret)
+            return import_spectrum(ret)
         else:
             raise ValueError(f'Unknown type {_type}')
 
