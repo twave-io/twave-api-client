@@ -7,7 +7,6 @@ from typing import List
 import numpy as np
 
 
-
 def _decode_array(data, fmt='int16_zlib'):
     bindata = b64decode(data)
 
@@ -36,7 +35,7 @@ class Metric:
     description: str
     asset_id: str
     name: str
-    data_type :str = 'float'
+    data_type: str = 'float'
     enum_type: str = ''
     unit: str = ''
     limit_min: float = 0
@@ -46,6 +45,7 @@ class Metric:
     format: str = ''
     suffix: str = ''
     # tags: list = field(default_factory=list)
+
 
 def import_metric(data):
     """Import metric data"""
@@ -68,6 +68,7 @@ def import_metric(data):
         suffix=data.get('suffix', ''),
     )
 
+
 @dataclass
 class TrendData:
     """Trend data"""
@@ -84,11 +85,12 @@ class TrendData:
 class PipeMeta:
     """Pipeline metadata"""
     id: str
-    description: str
     asset_id: str
-    created_at: int
     name: str
+    description: str
+    created_at: int
     # metrics: List[float]
+
 
 def import_pipe(data):
     """Import pipe data"""
@@ -147,6 +149,7 @@ class SpectrumMeta:
     synchronous: bool = False
     full: bool = False
 
+
 def import_spectrum(data):
     """Import spectrum data"""
     if not isinstance(data, dict):
@@ -168,6 +171,7 @@ def import_spectrum(data):
 
 class Trend:
     """Trend data"""
+
     def __init__(self, meta, data):
         self.meta = meta
         self.__data = data
@@ -179,6 +183,7 @@ class Trend:
 
 class Wave:
     """Waveform data"""
+
     def __init__(self, meta, data):
         self.meta = meta
         self.created_at = int(parse(data['created_at']).timestamp())
@@ -199,6 +204,7 @@ class Wave:
 
 class Spectrum:
     """Spectrum data"""
+
     def __init__(self, meta, data):
         self.meta = meta
         self.created_at = int(parse(data['created_at']).timestamp())
