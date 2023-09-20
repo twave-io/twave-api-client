@@ -33,10 +33,11 @@ class ObjectType(Enum):
 class TWaveClient:
     """TWave API Client"""
 
-    def __init__(self, host='localhost:8080', token=''):
+    def __init__(self, host='localhost:8080', token='', timeout=10):
         self.host = host
         self.__token = token
         self.__base_url = f'http://{self.host}/api/v1'
+        self.__timeout = timeout
 
     def __request(self, url, params=None, method='GET'):
         par = {'links': 'false'}
@@ -44,7 +45,7 @@ class TWaveClient:
             par.update(params)
 
         headers = {'Authorization': 'Bearer ' + self.__token}
-        ret = requests.request(method, url, params=par, headers=headers)
+        ret = requests.request(method, url, params=par, headers=headers, timeout=self.__timeout)
         ret.raise_for_status()
         data = ret.json()
 
